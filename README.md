@@ -29,6 +29,6 @@
       - /etc/openvpn/pki/private/client.key
     
     в папку "/etc/openvpn/client/" на хостовую машину;
-4) также скопируем файл настроек клиента из /task_2/ansible/roles/ovpn/templates/client.conf в директорию /etc/openvpn/client/ на хостовую машину;
+4) также скопируем файл настроек клиента из /task_2/ansible/roles/ovpn/templates/client.conf в директорию "/etc/openvpn/client/" на хостовую машину;
 5) после этого на хостовой машине запускем vpn канал командой ```sudo systemctl start openvpn-client@client```;
 6) остается только убедиться что канал работоспособен, для этого на хостовой машине попробуем пингануть сервер командой: ```ping -c 4 10.10.10.1```
