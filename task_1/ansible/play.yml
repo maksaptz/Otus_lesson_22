@@ -5,4 +5,12 @@
   become_method:
     sudo
   roles:
-        - ovpn
+        - server
+
+- hosts: client
+  become:
+    true
+  become_method:
+    sudo
+  roles:
+        - client
