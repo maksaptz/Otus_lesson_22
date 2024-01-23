@@ -1,0 +1,44 @@
+---
+- name: install ovpn
+  apt:
+    name:
+      - openvpn
+      - iperf3
+    state: latest
+    update_cache: true
+
+- name: set up conf ovpn-client
+  template:
+    src: templates/client.conf.j2
+    dest: /etc/openvpn/server/server.conf
+    mode: 0755
+
+      #- name: 123
+      #  copy: 
+      #    src: /etc/openvpn/static.key
+      #    dest: /etc/openvpn/static.key
+      #  delegate_to: server
+
+- name: download vpn key
+  copy:
+    src: /tmp/static.key
+    dest: /etc/openvpn/static.key
+    creates: /etc/openvpn/static.key
+      #- name: transfer data from machine1 to machine2
+      #  ansible.posix.synchronize:
+      #    mode: pull
+      #    src: /etc/openvpn/static.key 
+      #    dest: /etc/openvpn/static.key
+      #  delegate_to: server
+
+      #- name: transfer data from machine1 to machine2
+      #  copy:
+      #    src: /etc/openvpn/static.key
+      #    dest: /etc/openvpn/static.key
+      #  delegate_to: server
+
+- name: restart openvpn
+  service:
+    name: openvpn-server@server
+    state: restarted
+    enabled: true

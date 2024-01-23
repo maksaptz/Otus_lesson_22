@@ -1,0 +1,59 @@
+---
+- name: install ovpn
+  apt:
+    name:
+      - openvpn
+    state: present
+    update_cache: true
+
+- name: COMMAND | Init PKI
+  ansible.builtin.shell: "/usr/share/easy-rsa/easyrsa init-pki"
+  args:
+    chdir: "/etc/openvpn"
+
+- name: COMMAND | Init CA 
+  ansible.builtin.shell: "echo 'rasvpn' | /usr/share/easy-rsa/easyrsa build-ca nopass"
+  args:
+    chdir: "/etc/openvpn"
+
+- name: COMMAND | Generate server keys
+  ansible.builtin.shell: "echo 'rasvpn' | /usr/share/easy-rsa/easyrsa gen-req server nopass"
+  args:
+    chdir: "/etc/openvpn"
+
+- name: COMMAND | Sign server keys
+  ansible.builtin.shell: "echo 'yes' | /usr/share/easy-rsa/easyrsa sign-req server server"
+  args:
+    chdir: "/etc/openvpn"
+
+- name: COMMAND | Generate clients keys
+  ansible.builtin.shell: "echo 'client' | /usr/share/easy-rsa/easyrsa gen-req client nopass"
+  args:
+    chdir: "/etc/openvpn"
+
+- name: COMMAND | Sign clients keys
+  ansible.builtin.shell: "echo 'yes' | /usr/share/easy-rsa/easyrsa sign-req client client"
+  args:
+    chdir: "/etc/openvpn"
+
+- name: COMMAND | Generate DH
+  ansible.builtin.shell: "/usr/share/easy-rsa/easyrsa gen-dh"
+  args:
+    chdir: "/etc/openvpn"
+
+- name: COMMAND | Generate TLS auth key
+  ansible.builtin.shell: "openvpn --genkey secret ca.key" 
+  args:
+    chdir: "/etc/openvpn"
+
+- name: set up conf ovpn
+  template:
+    src: templates/server.conf
+    dest: /etc/openvpn/server/server.conf
+    mode: 0755
+
+- name: restart openvpn
+  service:
+    name: openvpn-server@server
+    state: restarted
+    enabled: true 

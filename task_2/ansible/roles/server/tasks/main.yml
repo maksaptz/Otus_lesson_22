@@ -1,0 +1,58 @@
+---
+- name: install ovpn
+  apt:
+    name:
+      - openvpn
+      - iperf3
+      - rsync
+    state: latest
+    update_cache: true
+
+- name: COMMAND | Generate TLS auth key
+  ansible.builtin.shell: "openvpn --genkey secret /etc/openvpn/static.key" 
+  args:
+    chdir: "/etc/openvpn"
+    creates: "/etc/openvpn/static.key"
+
+      #- name: transfer data from machine1 to machine2
+      #  synchronize: src=/etc/openvpn/static.key dest=/etc/openvpn/static.key
+      #  delegate_to: client
+      #  when: ansible_hostname == "server"
+
+      #- hosts: client
+      #  - name: Transfer file from ServerA to ServerB
+      #    synchronize:
+      #      src: /etc/openvpn/static.key
+      #      dest: /etc/openvpn/static.key
+      #    delegate_to: server
+
+        #- name: Transfer client.conf from OpenVPN server
+        #  synchronize:
+        #    src: /etc/openvpn/static.key
+        #    dest: /etc/openvpn/static.key
+        #  delegate_to: server
+      #- hosts: client
+      #    - name: Transfer key
+      #      synchronize:
+      #        src: /etc/openvpn/static.key
+      #        dest: /etc/openvpn/static.key
+      #      delegate_to: server
+
+- name: download key on template
+  fetch:
+    src: /etc/openvpn/static.key
+    dest: /tmp/static.key
+    flat: true
+    creates: "/etc/openvpn/static.key"
+
+- name: set up conf ovpn-server
+  template:
+    src: templates/server.conf.j2
+    dest: /etc/openvpn/server/server.conf
+    mode: 0755
+
+- name: restart openvpn
+  service:
+    name: openvpn-server@server
+    state: restarted
+    enabled: true 
